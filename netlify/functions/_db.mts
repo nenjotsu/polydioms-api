@@ -1,6 +1,38 @@
 import { neon } from '@neondatabase/serverless';
 import { SignJWT, jwtVerify, type JWTPayload } from "jose";
 
+// ── CORS ─────────────────────────────────────────────────────
+const ALLOWED_ORIGINS = [
+  "https://nenjotsu.github.io",   // ← your GitHub Pages domain
+  "http://localhost:3000",            // ← local dev
+  "http://localhost:5173",            // ← Vite dev server
+];
+
+export function getCorsHeaders(req: Request): Record<string, string> {
+  const origin = req.headers.get("Origin") ?? "";
+  const allowed = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+
+  return {
+    "Access-Control-Allow-Origin":      allowed,
+    "Access-Control-Allow-Methods":     "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers":     "Content-Type, Authorization",
+    "Access-Control-Allow-Credentials": "true",
+    "Access-Control-Max-Age":           "86400", // preflight cache: 24h
+  };
+}
+
+/** Handles OPTIONS preflight — call at the top of every function */
+export function handlePreflight(req: Request): Response | null {
+  if (req.method === "OPTIONS") {
+    return new Response(null, {
+      status: 204,
+      headers: getCorsHeaders(req),
+    });
+  }
+  return null;
+}
+
+
 export function getDb() {
   if (!process.env.DATABASE_URL) {
     throw new Error('DATABASE_URL is not set');
@@ -12,14 +44,19 @@ export function getDb() {
   return sql;
 }
 
-export function ok(data: unknown, status = 200) {
-  return Response.json({ success: true, data }, { status });
+export function ok(req: Request, data: unknown, status = 200) {
+  return Response.json(
+    { success: true, data },
+    { status, headers: getCorsHeaders(req) }
+  );
 }
 
-export function err(message: string, status = 400) {
-  return Response.json({ success: false, error: message }, { status });
+export function err(req: Request, message: string, status = 400) {
+  return Response.json(
+    { success: false, error: message },
+    { status, headers: getCorsHeaders(req) }
+  );
 }
-
 // ── JWT Helpers ──────────────────────────────────────────────
 
 const SECRET = new TextEncoder().encode(process.env.JWT_SECRET!);
@@ -57,6 +94,6 @@ export async function requireAuth(
   req: Request
 ): Promise<TokenPayload | Response> {
   const payload = await verifyToken(req);
-  if (!payload) return err("Unauthorized — invalid or expired token", 401);
+  if (!payload) return err(req, "Unauthorized — invalid or expired token", 401);
   return payload;
 }

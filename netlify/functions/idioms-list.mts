@@ -2,7 +2,7 @@ import type { Context } from "@netlify/functions";
 import { getDb, ok, err } from "./_db.mjs";
 
 export default async (req: Request, _ctx: Context) => {
-  if (req.method !== "GET") return err("Method not allowed", 405);
+  if (req.method !== "GET") return err(req, "Method not allowed", 405);
 
   const url = new URL(req.url);
   const lang = url.searchParams.get("lang");
@@ -37,5 +37,5 @@ export default async (req: Request, _ctx: Context) => {
     LIMIT ${limit} OFFSET ${offset}
   `;
 
-  return ok(idioms);
+  return ok(req, idioms);
 };

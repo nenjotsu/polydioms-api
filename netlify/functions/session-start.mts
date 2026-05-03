@@ -2,14 +2,14 @@ import type { Context } from "@netlify/functions";
 import { getDb, ok, err, requireAuth  } from "./_db.mjs";
 
 export default async (req: Request, _ctx: Context) => {
-  if (req.method !== "POST") return err("Method not allowed", 405);
+  if (req.method !== "POST") return err(req, "Method not allowed", 405);
 
   // 🔒 Guard
   const auth = await requireAuth(req);
   if (auth instanceof Response) return auth;
 
   const { language_id, difficulty, total_questions } = await req.json();
-  if (!language_id) return err("language_id is required");
+  if (!language_id) return err(req, "language_id is required");
 
   const sql = getDb();
 
@@ -24,5 +24,5 @@ export default async (req: Request, _ctx: Context) => {
     RETURNING id, started_at, total_questions
   `;
 
-  return ok(session, 201);
+  return ok(req, session, 201);
 };
