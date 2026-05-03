@@ -1,5 +1,5 @@
 import type { Context } from "@netlify/functions";
-import { getDb, ok, err } from "./_db.mjs";
+import { getDb, ok, err, signToken } from "./_db.mjs";
 import bcrypt from "bcryptjs";
 
 export default async (req: Request, _ctx: Context) => {
@@ -21,7 +21,9 @@ export default async (req: Request, _ctx: Context) => {
       VALUES (${codename}, ${password_hash}, ${avatar_emoji ?? "🧠"})
       RETURNING id, codename, avatar_emoji, total_score, created_at
     `;
-    return ok(user, 201);
+    // ✅ Issue JWT immediately after register
+    const token = await signToken({ user_id: user.id, codename: user.codename });
+    return ok({ user, token }, 201);
   } catch (e: any) {
     if (e.code === "23505") return err("Codename already taken", 409);
     throw e;

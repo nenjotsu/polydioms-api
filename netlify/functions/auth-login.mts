@@ -1,5 +1,5 @@
 import type { Context } from "@netlify/functions";
-import { getDb, ok, err } from "./_db.mjs";
+import { getDb, ok, err, signToken } from "./_db.mjs";
 import bcrypt from "bcryptjs";
 
 export default async (req: Request, _ctx: Context) => {
@@ -27,6 +27,9 @@ export default async (req: Request, _ctx: Context) => {
     UPDATE users SET last_seen_at = NOW() WHERE id = ${user.id}
   `;
 
+  // ✅ Issue JWT
+  const token = await signToken({ user_id: user.id, codename: user.codename });
+
   const { password_hash, ...safeUser } = user;
-  return ok(safeUser);
+  return ok({ user: safeUser, token });
 };
