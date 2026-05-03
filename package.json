@@ -1,0 +1,30 @@
+{
+  "name": "polydioms-api",
+  "version": "1.0.0",
+  "description": "A card game for language learners to discover and practice idioms across multiple languages - API",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nenjotsu/polydioms-api.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/nenjotsu/polydioms-api/issues"
+  },
+  "homepage": "https://github.com/nenjotsu/polydioms-api#readme",
+  "dependencies": {
+    "@neondatabase/serverless": "^1.1.0",
+    "@netlify/functions": "^5.2.0",
+    "bcryptjs": "^3.0.3",
+    "typescript": "^4.9.5"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.0"
+  }
+}
