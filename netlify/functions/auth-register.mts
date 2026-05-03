@@ -1,8 +1,11 @@
 import type { Context } from "@netlify/functions";
-import { getDb, ok, err, signToken } from "./_db.mjs";
+import { getDb, ok, err, signToken, handlePreflight } from "./_db.mjs";
 import bcrypt from "bcryptjs";
 
 export default async (req: Request, _ctx: Context) => {
+  const preflight = handlePreflight(req);       // ✅ step 1
+  if (preflight) return preflight;
+  
   if (req.method !== "POST") return err(req, "Method not allowed", 405);
 
   const { codename, password, avatar_emoji } = await req.json();

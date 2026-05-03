@@ -1,9 +1,12 @@
 import type { Context } from "@netlify/functions";
-import { getDb, ok, err, requireAuth } from "./_db.mjs";
+import { getDb, ok, err, requireAuth, handlePreflight } from "./_db.mjs";
 
 const POINTS = { correct: 10, wrong: 0 };
 
 export default async (req: Request, _ctx: Context) => {
+  const preflight = handlePreflight(req);       // ✅ step 1
+  if (preflight) return preflight;
+  
   if (req.method !== "POST") return err(req, "Method not allowed", 405);
 
   // 🔒 Guard

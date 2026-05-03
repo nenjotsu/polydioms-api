@@ -1,7 +1,10 @@
 import type { Context } from "@netlify/functions";
-import { getDb, ok, err } from "./_db.mjs";
+import { getDb, ok, err, handlePreflight } from "./_db.mjs";
 
 export default async (req: Request, _ctx: Context) => {
+  const preflight = handlePreflight(req);       // ✅ step 1
+  if (preflight) return preflight;
+  
   if (req.method !== "GET") return err(req, "Method not allowed", 405);
 
   const url = new URL(req.url);
