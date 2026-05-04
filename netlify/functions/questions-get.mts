@@ -4,7 +4,7 @@ import { getDb, ok, err, handlePreflight } from "./_db.mjs";
 export default async (req: Request, _ctx: Context) => {
   const preflight = handlePreflight(req);       // ✅ step 1
   if (preflight) return preflight;
-  
+
   if (req.method !== "GET") return err(req, "Method not allowed", 405);
 
   const url = new URL(req.url);
@@ -16,30 +16,33 @@ export default async (req: Request, _ctx: Context) => {
 
   const questions = await sql`
     SELECT
-      q.id          AS question_id,
-      q.question_type,
-      q.prompt_text,
+      i.id AS idiom_id,
+
       i.original_text,
-      i.transliteration,
+      i.literal_translation,
       i.english_meaning,
       i.difficulty,
-      l.code        AS language_code,
-      JSON_AGG(
-        JSON_BUILD_OBJECT(
-          'id',         ac.id,
-          'choice_text', ac.choice_text,
-          'is_correct',  ac.is_correct
-        ) ORDER BY RANDOM()
-      ) AS choices
-    FROM questions q
-    JOIN idioms i    ON i.id = q.idiom_id
-    JOIN languages l ON l.id = i.language_id
-    JOIN answer_choices ac ON ac.question_id = q.id
-    WHERE q.is_active = TRUE
-      AND i.is_active = TRUE
+
+      trim(l.code) AS language_code,
+      l.name AS language_name,
+      (
+        SELECT json_agg(w.english_meaning)
+        FROM (
+          SELECT english_meaning
+          FROM public.idioms
+          WHERE language_id = i.language_id
+            AND id != i.id
+            AND is_active = TRUE
+          ORDER BY RANDOM()
+          LIMIT 3
+        ) w
+      ) AS wrong_answers
+
+    FROM public.idioms i
+    JOIN public.languages l ON l.id = i.language_id
+    WHERE i.is_active = TRUE
       AND l.code = ${lang}
       ${difficulty ? sql`AND i.difficulty = ${Number(difficulty)}` : sql``}
-    GROUP BY q.id, i.id, l.code
     ORDER BY RANDOM()
     LIMIT ${count}
   `;

@@ -5,9 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "netlify dev",
-    "build": "tsc",
-    "deploy": "netlify deploy --prod && npm run build"
-
+    "deploy": "netlify deploy --prod"
   },
   "repository": {
     "type": "git",
@@ -15,7 +13,7 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "type": "commonjs",
   "bugs": {
     "url": "https://github.com/nenjotsu/polydioms-api/issues"
