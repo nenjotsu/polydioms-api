@@ -30,8 +30,7 @@ export default async (req: Request, _ctx: Context) => {
         FROM (
           SELECT english_meaning
           FROM public.idioms
-          WHERE language_id = i.language_id
-            AND id != i.id
+          WHERE id != i.id
             AND is_active = TRUE
           ORDER BY RANDOM()
           LIMIT 3
@@ -41,7 +40,7 @@ export default async (req: Request, _ctx: Context) => {
     FROM public.idioms i
     JOIN public.languages l ON l.id = i.language_id
     WHERE i.is_active = TRUE
-      AND l.code = ${lang}
+      AND trim(l.code) = ${lang}
       ${difficulty ? sql`AND i.difficulty = ${Number(difficulty)}` : sql``}
     ORDER BY RANDOM()
     LIMIT ${count}
