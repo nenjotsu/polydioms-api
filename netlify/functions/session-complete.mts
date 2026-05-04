@@ -11,7 +11,7 @@ export default async (req: Request, _ctx: Context) => {
   const auth = await requireAuth(req);
   if (auth instanceof Response) return auth;
 
-  const { session_id, time_taken_secs } = await req.json();
+  const { session_id, score, correct } = await req.json();
   if (!session_id) return err(req, "session_id is required");
 
   const sql = getDb();
@@ -19,10 +19,11 @@ export default async (req: Request, _ctx: Context) => {
   const [session] = await sql`
     UPDATE game_sessions
     SET completed_at    = NOW(),
-        time_taken_secs = ${time_taken_secs ?? null}
+        time_taken_secs = EXTRACT(EPOCH FROM (NOW() - game_sessions.started_at)),
+        score          = ${score},
+        correct_answers = ${correct}
     WHERE id = ${session_id}
       AND user_id = ${auth.user_id}      -- ← ownership check
-      AND completed_at IS NULL
     RETURNING user_id, score, correct_answers, total_questions
   `;
   if (!session) return err(req, "Session not found or already completed", 404);
