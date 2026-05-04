@@ -5,6 +5,7 @@ A card game for language learners to discover and practice idioms across multipl
 netlify dev
 
 netlify env:set DATABASE_URL "YOUR_NEON_CONNECTION_STRING"
+netlify env:set JWT_SECRET "JWT_SECRET"
 
 netlify deploy --prod
 ```
