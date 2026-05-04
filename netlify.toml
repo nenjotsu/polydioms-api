@@ -1,15 +1,6 @@
-[build]
-  command = "npm run build"
-  publish = "dist"
-
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
-
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/:splat"
-  status = 200
 
 # ✅ CORS headers for all function responses
 [[headers]]
